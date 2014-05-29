@@ -6,6 +6,7 @@ AccountsEntry =
     passwordSignupFields: 'EMAIL_ONLY'
     emailToLower: true
     usernameToLower: false
+    showCompanyNameField: false
     entrySignUp: '/sign-up'
 
   isStringEmail: (email) ->
@@ -25,6 +26,7 @@ AccountsEntry =
 
   signInRequired: (router, extraCondition) ->
     extraCondition ?= true
+    console.log 'Testando app'
     unless Meteor.loggingIn()
       unless Meteor.user() and extraCondition
         Session.set('fromWhere', router.path)

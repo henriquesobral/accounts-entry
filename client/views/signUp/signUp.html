@@ -29,23 +29,46 @@
         {{> entryError}}
         {{#if passwordLoginService}}
           <form class="entry-form {{signupClass}}" id='signUp'>
-            {{#if showUsername}}
+            {{#if showName}}
               <div class="form-group">
-                <label>{{t9n "username"}}</label>
-                <input autofocus name="username" type="string" class="form-control" value=''>
+                <label>{{t9n "name"}}</label>
+                <input autofocus name="name" type="string" class="form-control" value=''>
               </div>
             {{/if}}
 
             {{#if showEmail}}
               <div class="form-group">
                 <label>{{t9n "emailAddress"}}</label>
-                {{#if showUsername}}
+                {{#if showName}}
                   <input type="email" class="form-control" value='{{emailAddress}}'>
                 {{else}}
                   <input autofocus type="email" class="form-control" value='{{emailAddress}}'>
                 {{/if}}
               </div>
             {{/if}}
+
+            {{#if showCompanyName}}
+              <div class="form-group">
+                <label>{{t9n "companyName"}}</label>
+                {{#if showEmail}}
+                  <input name="companyName" type="string" class="form-control" value=''>
+                {{else}}
+                  <input autofocus name="companyName" type="string" class="form-control" value=''>
+                {{/if}}
+              </div>
+            {{/if}}
+
+            {{#if showUsername}}
+              <div class="form-group">
+                <label>{{t9n "username"}}</label>
+                {{#if showCompanyName}}
+                  <input name="username" type="string" class="form-control" value=''>
+                {{else}}
+                  <input autofocus name="username" type="string" class="form-control" value=''>
+                {{/if}}
+              </div>
+            {{/if}}
+
 
             <div class="form-group">
               <label>{{t9n "password"}}</label>

@@ -1,8 +1,23 @@
 AccountsEntry.entrySignUpHelpers = {
+  showCompanyName: ->
+    return AccountsEntry.settings.showCompanyNameField
+
+  showName: ->
+    fields = AccountsEntry.settings.passwordSignupFields
+
+    _.contains([
+      'NAME_AND_USERNAME_AND_EMAIL',
+      'NAME_AND_USERNAME_AND_OPTIONAL_EMAIL',
+      'NAME_AND_EMAIL',
+      'NAME_AND_USERNAME'], fields)
+
   showEmail: ->
     fields = AccountsEntry.settings.passwordSignupFields
 
     _.contains([
+      'NAME_AND_USERNAME_AND_EMAIL',
+      'NAME_AND_USERNAME_AND_OPTIONAL_EMAIL',
+      'NAME_AND_EMAIL'
       'USERNAME_AND_EMAIL',
       'USERNAME_AND_OPTIONAL_EMAIL',
       'EMAIL_ONLY'], fields)
@@ -11,6 +26,9 @@ AccountsEntry.entrySignUpHelpers = {
     fields = AccountsEntry.settings.passwordSignupFields
 
     _.contains([
+      'NAME_AND_USERNAME_AND_EMAIL',
+      'NAME_AND_USERNAME_AND_OPTIONAL_EMAIL',
+      'NAME_AND_USERNAME',
       'USERNAME_AND_EMAIL',
       'USERNAME_AND_OPTIONAL_EMAIL',
       'USERNAME_ONLY'], fields)
@@ -61,7 +79,19 @@ AccountsEntry.entrySignUpEvents = {
       else
         undefined
 
-    trimInput = (val)->
+    name =
+      if t.find('input[name="name"]')
+        t.find('input[name="name"]').value
+      else
+        undefined
+
+    companyName =
+      if t.find('input[name="companyName"]')
+        t.find('input[name="companyName"]').value
+      else
+        undefined
+
+    trimInput = (val) ->
       val.replace /^\s*|\s*$/g, ""
 
     email =
@@ -75,8 +105,7 @@ AccountsEntry.entrySignUpEvents = {
 
     fields = AccountsEntry.settings.passwordSignupFields
 
-
-    passwordErrors = do (password)->
+    passwordErrors = do (password) ->
       errMsg = []
       msg = false
       if password.length < 7
@@ -106,6 +135,18 @@ AccountsEntry.entrySignUpEvents = {
       'USERNAME_AND_EMAIL',
       'USERNAME_ONLY'], fields)
 
+    nameRequired = fields.indexOf('NAME_') > -1 || fields.indexOf('_NAME') > -1
+
+    companyNameRequired = AccountsEntry.settings.showCompanyNameField
+
+    if nameRequired && name.length is 0
+      Session.set('entryError', t9n("error.nameRequired"))
+      return
+
+    if companyNameRequired && companyName.length is 0
+      Session.set('entryError', t9n("error.companyNameRequired"))
+      return
+
     if usernameRequired && username.length is 0
       Session.set('entryError', t9n("error.usernameRequired"))
       return
@@ -125,11 +166,14 @@ AccountsEntry.entrySignUpEvents = {
 
     Meteor.call 'entryValidateSignupCode', signupCode, (err, valid) ->
       if valid
+        profileData =
+          name: name
+          companyName: companyName
         newUserData =
           username: username
           email: email
           password: password
-          profile: AccountsEntry.settings.defaultProfile || {}
+          profile: _.extend((AccountsEntry.settings.defaultProfile || {}), profileData)
         Accounts.createUser newUserData, (err, data) ->
           if err
             T9NHelper.accountsError err
