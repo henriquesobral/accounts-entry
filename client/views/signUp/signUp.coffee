@@ -174,23 +174,27 @@ AccountsEntry.entrySignUpEvents = {
           email: email
           password: password
           profile: _.extend((AccountsEntry.settings.defaultProfile || {}), profileData)
-        Accounts.createUser newUserData, (err, data) ->
-          if err
-            T9NHelper.accountsError err
-            return
-          #login on client
-          isEmailSignUp = _.contains([
-            'USERNAME_AND_EMAIL',
-            'EMAIL_ONLY'], AccountsEntry.settings.passwordSignupFields)
-          userCredential = if isEmailSignUp then email else username
-          Meteor.loginWithPassword userCredential, password, (error) ->
-            if error
-              T9NHelper.accountsError error
-            else if Session.get 'fromWhere'
-              Router.go Session.get('fromWhere')
-              Session.set 'fromWhere', undefined
-            else
-              Router.go AccountsEntry.settings.dashboardRoute
+
+        if Meteor.users.simpleSchema().namedContext().validate(newUserData, {modifier: false})
+          Accounts.createUser newUserData, (err, data) ->
+            if err
+              T9NHelper.accountsError err
+              return
+            #login on client
+            isEmailSignUp = _.contains([
+              'USERNAME_AND_EMAIL',
+              'EMAIL_ONLY'], AccountsEntry.settings.passwordSignupFields)
+            userCredential = if isEmailSignUp then email else username
+            Meteor.loginWithPassword userCredential, password, (error) ->
+              if error
+                T9NHelper.accountsError error
+              else if Session.get 'fromWhere'
+                Router.go Session.get('fromWhere')
+                Session.set 'fromWhere', undefined
+              else
+                Router.go AccountsEntry.settings.dashboardRoute
+        else
+          console.log Meteor.users.simpleSchema().namedContext()
       else
         console.log err
         Session.set 'entryError', t9n("error.signupCodeIncorrect")
